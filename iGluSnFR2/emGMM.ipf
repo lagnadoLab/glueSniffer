@@ -37,9 +37,14 @@ string k4Clust = dataName+"_k4"
 string k5Clust = dataName+"_k5"
 string k6Clust = dataName+"_k6"
 string k7Clust = dataName+"_k7"
-string k8Clust = dataName + "_k8"
-string k9Clust = dataName + "_k9"
-string k10Clust = dataName + "_k10"
+string k8Clust = dataName+"_k8"
+string k9Clust = dataName+"_k9"
+string k10Clust = dataName+"_k10"
+string k11Clust = dataName+"_k11"
+string k12Clust = dataName+"_k12"
+string k13Clust = dataName+"_k13"
+string k14Clust = dataName+"_k14"
+
 
 // Run algorithm on each possible number of clusters
 variable logP2 = kEMgmm(scaleData,data,2,k2Clust,scale)
@@ -51,12 +56,16 @@ variable logP7 = kEMgmm(scaleData,data,7,k7Clust,scale)
 variable logP8 = kEMgmm(scaleData,data,8,k8Clust,scale)
 variable logP9 = kEMgmm(scaleData,data,9,k9Clust,scale)
 variable logP10 = kEMgmm(scaleData,data,10,k10Clust,scale)
+variable logP11 = kEMgmm(scaleData,data,11,k11Clust,scale)
+variable logP12 = kEMgmm(scaleData,data,12,k12Clust,scale)
+variable logP13 = kEMgmm(scaleData,data,13,k13Clust,scale)
+variable logP14 = kEMgmm(scaleData,data,14,k14Clust,scale)
 
 
 //Record log probabilities and some metrics for model selection
 make/o/N=(7) kP
 variable i
-kP = {logP2,logP3,logP4,logP5,logP6,logP7,logP8,logP9,logP10}
+kP = {logP2,logP3,logP4,logP5,logP6,logP7,logP8,logP9,logP10,logP11,logP12,logP13,logP14}
 duplicate/o kP, AIC, BIC
 AIC = 0
 BIC = 0
@@ -81,9 +90,13 @@ string s7 = k7Clust + "_simData"
 string s8 = k8Clust + "_simData"
 string s9 = k9Clust + "_simData"
 string s10 = k10Clust + "_simData"
+string s11 = k11Clust + "_simData"
+string s12 = k12Clust + "_simData"
+string s13 = k13Clust + "_simData"
+string s14 = k14Clust + "_simData"
 
 killwaves/z simMat
-concatenate/NP=1 {$s2,$s3,$s4,$s5,$s6,$s7,$s8,$s9,$s10}, simMat
+concatenate/NP=1 {$s2,$s3,$s4,$s5,$s6,$s7,$s8,$s9,$s10,$s11,$s12,$s13,$s14}, simMat
 string/g simMatName = dataName +"simMat"
 duplicate/o simMat, $simMatName
 make/o/n=(100) ampHist
@@ -91,7 +104,6 @@ Histogram/P/B={0,maxDat/100,100} data, ampHist
 string/g histName = dataName + "_AH"
 duplicate/o ampHist, $histName
 variable/g onClust = 0
-
 gmmWindow()
 end
 
@@ -116,9 +128,12 @@ Display/k=1/W=(100,0,800,400)/N=clusterThingy aHist as "Cluster GUI"
 appendtograph clustDat vs xS
 modifygraph margin(bottom)=100
 ModifyGraph rgb(clustDat)=(8738,8738,8738)
-
+Label bottom "\\Z14 Deconvolved Amplitude"
+Label left "\\Z14 Count/Scaled Amplitude"
+variable/g nQuantaShow
+nQuantaShow = onClust + 2
 ///Val Display
-ValDisplay cluster value = #"onClust"
+ValDisplay cluster value = #"nQuantaShow"
 
 //Button
 Button nextClust size = {100,25}, proc = nextClustProc, title="Next"
@@ -133,10 +148,10 @@ struct WMButtonAction &ba
 		case 2:
 			variable/g onClust
 			dowindow/k clusterThingy
-			if (onClust<8)
+			if (onClust<13)
 				onClust +=1
 				gmmWindow()
-			elseif (onClust==8)
+			elseif (onClust==13)
 				onClust=0
 				gmmWindow()
 			endif
@@ -165,6 +180,11 @@ struct WMButtonAction &ba
 			string k8Clust = dataName+"_k8"
 			string k9Clust = dataName+"_k9"
 			string k10Clust = dataName+"_k10"
+			string k11Clust = dataName+"_k11"
+			string k12Clust = dataName+"_k12"
+			string k13Clust = dataName+"_k13"
+			string k14Clust = dataName+"_k14"
+			
 			
 			string sig1 = k1Clust+"_sigmaHat"
 			string mu1 = k1Clust + "_muHat"
@@ -193,19 +213,40 @@ struct WMButtonAction &ba
 			string sig7 = k7Clust+"_sigmaHat"
 			string mu7 = k7Clust + "_muHat"
 			string a7 = k7Clust + "_aHat"
-			string sig8 = k7Clust+"_sigmaHat"
-			string mu8 = k7Clust + "_muHat"
-			string a8 = k7Clust + "_aHat"
-			string sig9 = k7Clust+"_sigmaHat"
-			string mu9 = k7Clust + "_muHat"
-			string a9 = k7Clust + "_aHat"
-			string sig10 = k7Clust+"_sigmaHat"
-			string mu10 = k7Clust + "_muHat"
-			string a10 = k7Clust + "_aHat"
+			string sig8 = k8Clust+"_sigmaHat"
+			string mu8 = k8Clust + "_muHat"
+			string a8 = k8Clust + "_aHat"
+			string sig9 = k9Clust+"_sigmaHat"
+			string mu9 = k9Clust + "_muHat"
+			string a9 = k9Clust + "_aHat"
+			string sig10 = k10Clust+"_sigmaHat"
+			string mu10 = k10Clust + "_muHat"
+			string a10 = k10Clust + "_aHat"
+			
+			string sig11 = k11Clust+"_sigmaHat"
+			string mu11 = k11Clust + "_muHat"
+			string a11 = k1Clust + "_aHat"
+			
+			string sig12 = k12Clust+"_sigmaHat"
+			string mu12 = k12Clust + "_muHat"
+			string a12 = k12Clust + "_aHat"
+			
+			string sig13 = k13Clust+"_sigmaHat"
+			string mu13 = k13Clust + "_muHat"
+			string a13 = k13Clust + "_aHat"
+			
+			string sig14 = k14Clust+"_sigmaHat"
+			string mu14 = k14Clust + "_muHat"
+			string a14 = k14Clust + "_aHat"
+			
 			string map7 = k7Clust + "_clustMAP"
 			string map8 = k8Clust + "_clustMAP"
 			string map9 = k9Clust + "_clustMAP"
 			string map10 = k10Clust + "_clustMAP"
+			string map11 = k11Clust + "_clustMAP"
+			string map12 = k12Clust + "_clustMAP"
+			string map13 = k13Clust + "_clustMAP"
+			string map14 = k14Clust + "_clustMAP"
 			
 			string sim1 = k1Clust + "_simData"
 			string sim2 = k2Clust + "_simData"
@@ -217,76 +258,105 @@ struct WMButtonAction &ba
 			string sim8 = k8Clust + "_simData"
 			string sim9 = k9Clust + "_simData"
 			string sim10 = k10Clust + "_simData"
+			string sim11 = k11Clust + "_simData"
+			string sim12 = k12Clust + "_simData"
+			string sim13 = k13Clust + "_simData"
+			string sim14 = k14Clust + "_simData"
 			string simDataNa = dataName + "_sim"
 			string finalSigma = dataName + "_S2"
 			string finalMu = dataName + "_Mu"
 			string finalA = dataName + "_AVals"
 
-			if (onClust==1)
+			if (onClust==0)
 				duplicate/o $sim2, $simDataNa
 				duplicate/o $sig2, $finalSigma
 				duplicate/o $mu2, $finalMu
 				duplicate/o $a2, $finalA
 				duplicate/o $map2, MAP
-			elseif (onClust==2)
+			elseif (onClust==1)
 				duplicate/o $sim3, $simDataNa
 				duplicate/o $sig3, $finalSigma
 				duplicate/o $mu3, $finalMu
 				duplicate/o $a3, $finalA
 				duplicate/o $map3, MAP
-			elseif (onClust==3)
+			elseif (onClust==2)
 				duplicate/o $sim4, $simDataNa
 				duplicate/o $sig4, $finalSigma
 				duplicate/o $mu4, $finalMu
 				duplicate/o $a4, $finalA
 				duplicate/o $map4, MAP
-			elseif (onClust==4)
+			elseif (onClust==3)
 				duplicate/o $sim5, $simDataNa
 				duplicate/o $sig5, $finalSigma
 				duplicate/o $mu5, $finalMu
 				duplicate/o $a5, $finalA
 				duplicate/o $map5, MAP
-			elseif (onClust==5)
+			elseif (onClust==4)
 				duplicate/o $sim6, $simDataNa
 				duplicate/o $sig6, $finalSigma
 				duplicate/o $mu6, $finalMu
 				duplicate/o $a6, $finalA
 				duplicate/o $map6, MAP
-			elseif (onClust==6)
+			elseif (onClust==5)
 				duplicate/o $sim7, $simDataNa
 				duplicate/o $sig7, $finalSigma
 				duplicate/o $mu7, $finalMu
 				duplicate/o $a7, $finalA
 				duplicate/o $map7, MAP
-			elseif (onClust==7)
+			elseif (onClust==6)
 				duplicate/o $sim8, $simDataNa
 				duplicate/o $sig8, $finalSigma
 				duplicate/o $mu8, $finalMu
 				duplicate/o $a8, $finalA
 				duplicate/o $map8, MAP
-			elseif (onClust==8)
+			elseif (onClust==7)
 				duplicate/o $sim9, $simDataNa
 				duplicate/o $sig9, $finalSigma
 				duplicate/o $mu9, $finalMu
 				duplicate/o $a9, $finalA
 				duplicate/o $map9, MAP
-			elseif (onClust==9)
+			elseif (onClust==8)
 				duplicate/o $sim10, $simDataNa
 				duplicate/o $sig10, $finalSigma
 				duplicate/o $mu10, $finalMu
 				duplicate/o $a10, $finalA
 				duplicate/o $map10, MAP
+			elseif (onClust==9)
+				duplicate/o $sim11, $simDataNa
+				duplicate/o $sig11, $finalSigma
+				duplicate/o $mu11, $finalMu
+				duplicate/o $a11, $finalA
+				duplicate/o $map11, MAP
+			elseif (onClust==10)
+				duplicate/o $sim12, $simDataNa
+				duplicate/o $sig12, $finalSigma
+				duplicate/o $mu12, $finalMu
+				duplicate/o $a12, $finalA
+				duplicate/o $map12, MAP
+			elseif (onClust==11)
+				duplicate/o $sim13, $simDataNa
+				duplicate/o $sig13, $finalSigma
+				duplicate/o $mu13, $finalMu
+				duplicate/o $a13, $finalA
+				duplicate/o $map13, MAP
+			elseif (onClust==12)
+				duplicate/o $sim14, $simDataNa
+				duplicate/o $sig14, $finalSigma
+				duplicate/o $mu14, $finalMu
+				duplicate/o $a14, $finalA
+				duplicate/o $map14, MAP
 			
 			endif
 			
 				
 				
-			killwaves/z $k1Clust,$k2Clust,$k3Clust,$k4Clust,$k5Clust,$k6Clust,$k7Clust
-			killwaves/z $sig1,$sig2,$sig3,$sig4,$sig5,$sig6,$sig7
-			killwaves/z $mu1,$mu2,$mu3,$mu4,$mu5,$mu6,$mu7
-			killwaves/z $a1,$a2,$a3,$a4,$a5,$a6,$a7
-			killwaves/z $map1,$map2,$map3,$map4,$map5,$map6,$map7
-			killwaves/z $sim1,$sim2,$sim3,$sim4,$sim5,$sim6,$sim7
+			killwaves/z $k1Clust,$k2Clust,$k3Clust,$k4Clust,$k5Clust,$k6Clust,$k7Clust,$k8Clust,$k9Clust,$k10Clust,$k11Clust,$k12Clust,$k13Clust,$k14Clust
+			killwaves/z $sig1,$sig2,$sig3,$sig4,$sig5,$sig6,$sig7,$sig8,$sig9,$sig10,$sig11,$sig12,$sig13,$sig14
+			killwaves/z $mu1,$mu2,$mu3,$mu4,$mu5,$mu6,$mu7,$mu8,$mu9,$mu10,$mu11,$mu12,$mu13,$mu14
+			killwaves/z $a1,$a2,$a3,$a4,$a5,$a6,$a7,$a8,$a9,$a10,$a11,$a12,$a13,$a14
+		
+			killwaves/z $map1,$map2,$map3,$map4,$map5,$map6,$map7,$map8,$map9,$map10,$map11,$map12,$map13,$map14
+			killwaves/z $sim1,$sim2,$sim3,$sim4,$sim5,$sim6,$sim7,$sim8,$sim9,$sim10,$sim11,$sim12,$sim13,$sim14
 			killwaves/z simDat,simMat,sumR,timeSeriesP,sigma2Hat,scaleData,sd,muHat,mapGrab,levelsWave
 			killwaves/z cdata,ampHist,aHat,aHist,data,fit, clustDat
 			duplicate/o $dataname, tempQ
@@ -297,9 +367,43 @@ struct WMButtonAction &ba
 		
 			string eventName = (dataName[0,strlen(dataName)-2]) + "E"
 			display/k=1 $quantaName vs $eventName
+			Label bottom "\Z14 Time (s)"
+			Label Left "\Z14 Estimted Quanta"
 			ModifyGraph mode=1
 			SetAxis left 0,*
 			killwaves/z tempQ
+			variable nF = dimsize($eventName,0)
+			variable i
+			variable j
+			make/o/n=(onClust+3) pWave, qWave
+			string pWaveName = quantaName + "P"
+			string qWaveName = quantaName + "Sum"
+			pWave = 0
+		
+			
+			for (i=0;i<nF;i+=1)
+				for (j=0;j<onClust+3;j+=1)
+					if (MAP[i]==j)
+						pWave[j]+=1
+					endif
+				endfor
+			endfor
+			for (i=0;i<onClust+3;i+=1)
+				qWave[i]=pWave[i] * i
+			endfor
+			variable qSum  = sum(qWave)
+			qWave/=qSum
+			pWave/=nF
+			duplicate/o pWave, $pWaveName
+			killwaves/z pWave
+			display $pWaveName
+			label left "Proportion of Events"
+			label bottom "nQuanta"
+			duplicate/o qWave, $qWaveName
+			killwaves/z qWave
+			display $qWaveName
+			label left "Proportion of Quanta Distributed"
+			label bottom "nQuanta"
 		endswitch
 	
 	end
@@ -331,7 +435,11 @@ make/o/n=(nobj) MAP
 variable objMAP
 ////////////////// EM
 variable it
-variable its = 30
+variable its = 25
+string sigmaName = kDataname+"_sigmaHat"
+			string muName = kDataName + "_muHat"
+			string aName = kDataname + "_aHat"
+			string clustMAPName = kDataName + "_clustMAP"
 make/o/n=(its) timeSeriesP
 for (it=0;it<its;it+=1)
 // E Step
@@ -340,9 +448,9 @@ for (it=0;it<its;it+=1)
 	for (obj=0;obj<nObj;obj+=1)
 		for (group=0;group<k;group+=1)
 			w[obj][group] = -.5*ln((2*pi*sigma2Hat[group])) -(scaleData[obj]-muHat[group])^2-(2*sigma2Hat[group])
-			if (w[obj][group]==-Inf)
-				w[obj][group]=0
-			endif
+			//if (w[obj][group]==-Inf)
+			//	w[obj][group]=0
+			//endif
 		endfor
 		duplicate/o/rmd=[obj][] w, tempRow
 		variable logMax = wavemax(tempRow)
@@ -379,9 +487,9 @@ for (it=0;it<its;it+=1)
 	///// Likelihood/Convergence Shit
 	variable logP = 0
 	for (obj=0;obj<nObj;obj+=1)
-		duplicate/o/RMD=[obj][], w, mapGrab
+		duplicate/o/RMD=[obj][] w, mapGrab
 		objMAP = wavemax(mapGrab)
-		findvalue/V=(objMAP) mapGrab
+		findvalue/t=.001/V=(objMAP) mapGrab
 		MAP[obj] =V_Value
 		if (MAP[obj] == -1)
 			MAP[obj] = 0
@@ -392,10 +500,7 @@ for (it=0;it<its;it+=1)
 	print it
 	if (it>20)
 		if (timeSeriesP[it] >= sum(timeSeriesP,it-9,it)/10 + tol)
-			string sigmaName = kDataname+"_sigmaHat"
-			string muName = kDataName + "_muHat"
-			string aName = kDataname + "_aHat"
-			string clustMAPName = kDataName + "_clustMAP"
+			
 			duplicate/o MAP, $clustMAPName
 			sigma2Hat *= (scale)^2
 			muhat *= scale
@@ -408,11 +513,7 @@ for (it=0;it<its;it+=1)
 				print itRan
 			return logP
 		elseif (it==its-1)
-			 sigmaName = kDataname+"_sigmaHat"
-			 muName = kDataName + "_muHat"
-			 aName = kDataname + "_aHat"
-			 clustMAPName = kDataName + "_clustMAP"
-			 duplicate/o MAP, $clustMAPName
+			duplicate/o MAP, $clustMAPName
 			sigma2Hat *= (scale)^2
 			muhat *= scale
 			duplicate/o sigma2Hat, $sigmaName
@@ -421,8 +522,8 @@ for (it=0;it<its;it+=1)
 			killwaves sigma2Hat,aHat,muHat
 			analEM(scaleData,data,kDataName,muname,sigmaName,aName,scale)
 			deletepoints it, its, timeSeriesP
-			 itRan = "Did not converge in " + num2str(its) + " iterations"
-				print itRan
+			itRan = "Did not converge in " + num2str(its) + " iterations"
+			print itRan
 			return logP
 		endif
 		killwaves sigma2Hat,aHat,muHat

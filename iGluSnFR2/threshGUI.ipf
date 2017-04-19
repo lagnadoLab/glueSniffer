@@ -34,6 +34,8 @@ duplicate/o/RMD=[][onROI] data, waveDat
 variable maxDat = wavemax(waveDat)
 
 Display/K=1/W=(100,0,800,400)/N=threshyThingy waveDat as "Thresholding GUI"
+Label left "Deconvolved amplitude"
+Label Bottom "Time (s)"
 ModifyGraph margin(bottom)=100
 /// Slider
 Slider threshSlide, pos+={25,350}, size={450,250},vert=0,value=0, proc=threshSliderProc, limits = {0,maxDat,maxDat/1000}

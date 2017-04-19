@@ -124,17 +124,7 @@ Function quantaStuff(ampName,timeName,stimName,protocolNum)
 			
 			
 			
-	
-	display blahMat[1][]
-	for (i=2;i<stimBlocks+1;i+=1)
-		appendTograph blahMat[i][]
-	endfor
-	
-	display blahMat2[1][]
-	for (i=2;i<stimBlocks+1;i+=1)
-		appendTograph blahMat2[i][]
-	endfor
-	
+
 	
 
 	// Record shit in a logical manner
@@ -177,6 +167,8 @@ Function quantaStuff(ampName,timeName,stimName,protocolNum)
 	
 	// Graph some stuff
 	Display/k=1 $meanMatName[][0] vs stimOrder as "Mean Events Per Cycle"
+	Label left "nQuantal Events Per Cycle"
+	Label bottom "Frequency (Hz)"
  	i=1
  	do
 		AppendToGraph $meanMatName[][i] vs StimOrder
@@ -184,6 +176,8 @@ Function quantaStuff(ampName,timeName,stimName,protocolNum)
 	while (i<maxQuanta)
 	
 	Display/k=1 $varMatName[][0] vs stimOrder as "Variance Events PerCycle"
+	Label left "Varianc of nQuantal Events per Cycle"
+	Label bottom "Frequency (Hz)"
 	i = 1
 	do 
 		AppendToGraph $varMatName[][i] vs StimOrder
@@ -194,13 +188,19 @@ Function quantaStuff(ampName,timeName,stimName,protocolNum)
 	
 	Display/k=1 $meanMatSumName[][0] vs StimOrder as "Mean Events Per Stimulus Block"
 	i=1
+	Label Left "Mean nQuantal Events per Stim Block"
+	Label bottom "Frequency (Hz)"
 	do
 		AppendToGraph $meanMatSumName[][i]
 		i+=1
 	while (i<maxQuanta)
 	
 	Display/k=1 $sumMeanName vs stimOrder as "Mean Quanta Per Cycle"
+	Label Left "Mean Sum of Quanta Per Cycle"
+	Label Bottom "Frequency"
 	Display/k=1 $sumVarName vs stimOrder as "Variance Quanta Per Cycle"
+	Label Left "Variance Sum of Quanta Per Cycle"
+	Label Bottom "Frequency (Hz)"
 end
 
 
@@ -269,6 +269,13 @@ duplicate/o/RMD=[][i] delayMat, tempVec
 
 deletePoints onWhichCyc,(maxDelays-onWhichCyc),tempVec
 duplicate/o tempVec, $delayVecType
+
+string delayVecHist = delayVecType + "_H"
+make/o/n=100 $delayVecHist; delayUpdate
+Histogram/B={0,.001,100} $delayVecType, $delayVecHist
+Display/k=1 $delayVecHist
+string res = num2str(dimsize($delayVecType,0)) + " of "+ num2str(nCyc[i]) +" responded"
+textbox res
 endfor
 killwaves/z tempVec, delayMat, data, cycStarts,startTimes,cycleTime,nCyc
 
