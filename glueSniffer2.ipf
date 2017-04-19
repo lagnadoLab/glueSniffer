@@ -362,7 +362,7 @@ Function newDefine(wavename)
    
    
    display/k=1/N=Profile $out
-   Legend/C/N=text0/J/F=0/A=RT "\\f01\\Z14Define AZ's using cursor pair(s) and close window"
+   Legend/C/N=text0/J/F=0/A=RT "\\f01\\Z14Define AZ means with cursors and close window"
    ShowInfo/CP={0,1,2}/W=Profile
    MoveWindow/W=Profile 0, 400, 600, 600
    
@@ -439,11 +439,16 @@ Function newDefine(wavename)
 	duplicate/o tmpA, $AName
 	killwaves tmpMu, tmpA
 	fitGauss(out,muName,aName)
-	Display/k=1 $out
+	Display/k=1/n=fitGraph $out as "Gaussian Mixture Fit"
 	print fitName
 	print spatFilt
 	AppendToGraph $fitName
-	NewImage/k=1 $spatFilt
+	Label left "Normalized Intensity";DelayUpdate
+	Label bottom "Location (pixels)"
+	ModifyGraph rgb($fitName)=(0,0,0)
+	Legend/C/N=text1/A=MC
+
+	
 	
    end
 ////////////////////////////////////////// Define AZs ////////////////////////////////////////
@@ -612,6 +617,9 @@ Function TemporalProfile(WaveName,aName,muName,sigmaName)
 	DeltaF(azName1)
 	newWiener(azName1)
 	concatenate/np=1 {$decon1}, deconMat
+	display $decon1 as "Temporally Deconvolved AZ1"
+	label left "Deconvolved Amplitude"
+	label bottom "Time (s)"
 	if (nRoi>=2)
 		string azName2 = waveName[0, (strlen(waveName)-3)]+"_AZ2"
 		duplicate/o/RMD=[][1] roiDat, $azName2
@@ -622,6 +630,9 @@ Function TemporalProfile(WaveName,aName,muName,sigmaName)
 		string decon2 = azName2 + "_D"
 		concatenate/np=1 {$decon2}, deconMat
 		print decon2
+			display $decon2 as "Temporally Deconvolved AZ2"
+		label left "Deconvolved Amplitude"
+		label bottom "Time (s)"
 	endif
 	if (nRoi>=3)
 		string azName3 = waveName[0, (strlen(waveName)-3)]+"_AZ3"
@@ -632,8 +643,12 @@ Function TemporalProfile(WaveName,aName,muName,sigmaName)
 		
 	DeltaF(azName3)
 	newWiener(azName3)
+	
 	string decon3 = azName3 + "_D"
 		concatenate/np=2 {$decon3}, deconMat
+		display $decon3 as "Temporally Deconvolved AZ3"
+	label left "Deconvolved Amplitude"
+	label bottom "Time (s)"
 	endif
 	if (nRoi >=4)
 		string azName4 = waveName[0, (strlen(waveName)-3)]+"_AZ4"
@@ -646,6 +661,9 @@ Function TemporalProfile(WaveName,aName,muName,sigmaName)
 	string decon4 = azName4 + "_D"
 		concatenate/np=2 {$decon4}, deconMat
 	endif
+	display $decon4 as "Temporally Deconvolved AZ4"
+	label left "Deconvolved Amplitude"
+	label bottom "Time (s)"
 	if (nROI >=5)
 		string azName5 = waveName[0, (strlen(waveName)-3)]+"_AZ5"
 	
@@ -656,7 +674,11 @@ Function TemporalProfile(WaveName,aName,muName,sigmaName)
 	newWiener(azName5)
 	string decon5 = azName5 + "_D"
 		concatenate/np=2 {$decon5}, deconMat
+		display $decon5 as "Temporally Deconvolved AZ5"
+	label left "Deconvolved Amplitude"
+	label bottom "Time (s)"
 	endif
+	
 	if (nRoi>=6)
 		string azName6 = waveName[0, (strlen(waveName)-3)]+"_AZ6"
 		duplicate/o/RMD=[][5] roiDat, $azName6
@@ -666,6 +688,9 @@ Function TemporalProfile(WaveName,aName,muName,sigmaName)
 	newWiener(azName6)
 	string decon6 = azName6 + "_D"
 		concatenate/np=2 {$decon6}, deconMat
+		display $decon6 as "Temporally Deconvolved AZ6"
+	label left "Deconvolved Amplitude"
+	label bottom "Time (s)"
 	endif
 	string roiMat = (waveName[0,strlen(waveName)-3]) + "_roiDatMat"
 	duplicate/o roiDat, $roiMat
@@ -877,7 +902,8 @@ Struct WMButtonAction &ba
 			string eventName = waveName[0,strlen(waveName)-3] + "E"
 			duplicate/o $eventName, times
 			
-			
+			make/o/n=12 stimOrder1, stimOrder2,stimOrder3,stimOrder4
+			stimOrder1 = {0,.5,1,2,5,8,10,15,20,25,30,0}
 			string stimList = wavelist("*order*",";","Dims:1")
 			string stimName
 			prompt stimname, "Select Stim Order Wave",popup, stimList
@@ -979,7 +1005,10 @@ Struct WMButtonAction &ba
 				Abort
 			endif
 			
-			string stimList = wavelist("*order*",";","Dims:1")
+			make/o/n=12 stimOrder1, stimOrder2,stimOrder3,stimOrder4
+			stimOrder1 = {0,.5,1,2,5,8,10,15,20,25,30,0}
+			
+			string stimList = wavelist("*rder*",";","Dims:1")
 			string stimName
 			prompt stimname, "Select Stim Order Wave",popup, stimList
 			doPrompt "Pick the Stim Wave", stimName
@@ -988,12 +1017,15 @@ Struct WMButtonAction &ba
 			endif
 			
 				
-			variable protocolNum = 0
+			variable protocolNum = 1
 			prompt protocolNum, "Enter protocol Number"
 			doprompt "Enter protocol Number", protocolnum
 			if(V_flag==1)
 					Abort
 			endif
+			
+			
+			
 			
 			tempPrec(wavename,stimName,protocolnum)
 			
@@ -1250,7 +1282,9 @@ Function TemporalProfileOld(waveName)
    newWiener(outName1)
    //setscale/P x, 0, deltat, $outName1 
    duplicate/o $outName1, tempAZ1
-   concatenate/NP=1 {tempAZ1}, decMat
+   string deconMat1 = outName1 + "_D"
+   duplicate/o $deconMat1, dec1
+   concatenate/NP=1 {dec1}, decMat
 
 //Get the response in AZ2, if it exists			
 	if(tempAZ[2]!=0)
@@ -1274,7 +1308,11 @@ Function TemporalProfileOld(waveName)
    	//EventD(outName2)
    	//setscale/P x, 0, deltat, $outName1 
    	duplicate/o $outName2, tempAZ2
-   	concatenate/NP=1 {tempAZ2}, decMat
+   	 duplicate/o $outName1, tempAZ1
+   string deconMat2 = outName2 + "_D"
+   duplicate/o $deconMat2, dec2
+   concatenate/NP=1 {dec2}, decMat
+
 
 	endif
  
@@ -1298,11 +1336,15 @@ Function TemporalProfileOld(waveName)
    	//EventD(outName3) 
    	//setscale/P x, 0, deltat, $outName1
    	duplicate/o $outName3, tempAZ3
-   	concatenate/NP=1 {tempAZ3}, decMat
+   	 duplicate/o $outName1, tempAZ1
+   string deconMat3 = outName3 + "_D"
+   duplicate/o $deconMat1, dec3
+   concatenate/NP=1 {dec3}, decMat
+
  
 	endif                   
 
-	KillWaves tempAZ, tempAZ1, tempAZ2, tempAZ3, decMat
+	KillWaves tempAZ, tempAZ1, tempAZ2, tempAZ3
 	Execute "TileWindows/O=1/C"
 	string deconMatName = (waveName[0,strlen(wavename)-3]) + "_deconMat"
 	duplicate/o decMat, $deconMatName
