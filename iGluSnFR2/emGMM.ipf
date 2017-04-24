@@ -396,12 +396,12 @@ struct WMButtonAction &ba
 			pWave/=nF
 			duplicate/o pWave, $pWaveName
 			killwaves/z pWave
-			display $pWaveName
+			display/k=1 $pWaveName
 			label left "Proportion of Events"
 			label bottom "nQuanta"
 			duplicate/o qWave, $qWaveName
 			killwaves/z qWave
-			display $qWaveName
+			display/k=1 $qWaveName
 			label left "Proportion of Quanta Distributed"
 			label bottom "nQuanta"
 		endswitch
@@ -435,7 +435,7 @@ make/o/n=(nobj) MAP
 variable objMAP
 ////////////////// EM
 variable it
-variable its = 25
+variable its = 50
 string sigmaName = kDataname+"_sigmaHat"
 			string muName = kDataName + "_muHat"
 			string aName = kDataname + "_aHat"
@@ -481,7 +481,7 @@ for (it=0;it<its;it+=1)
 		sigma2Hat[group] /=aHat[group]*nObj
 		sigma2Hat[group] = sqrt(sigma2Hat[group])
 		if (sigma2Hat[group]==0)
-			sigma2Hat[group] = sqrt(variance(scaleData))
+			sigma2Hat[group] = (variance(scaleData))
 		endif
 	endfor
 	///// Likelihood/Convergence Shit
@@ -498,7 +498,7 @@ for (it=0;it<its;it+=1)
 	endfor
 	timeSeriesP[it] = logP
 	print it
-	if (it>20)
+	if (it>35)
 		if (timeSeriesP[it] >= sum(timeSeriesP,it-9,it)/10 + tol)
 			
 			duplicate/o MAP, $clustMAPName
@@ -519,15 +519,13 @@ for (it=0;it<its;it+=1)
 			duplicate/o sigma2Hat, $sigmaName
 			duplicate/o muhat, $muName
 			duplicate/o aHat, $aName
-			killwaves sigma2Hat,aHat,muHat
 			analEM(scaleData,data,kDataName,muname,sigmaName,aName,scale)
 			deletepoints it, its, timeSeriesP
 			itRan = "Did not converge in " + num2str(its) + " iterations"
 			print itRan
 			return logP
 		endif
-		killwaves sigma2Hat,aHat,muHat
-		killwaves/z tempRow
+		
 	endif
 
 			
@@ -535,7 +533,8 @@ for (it=0;it<its;it+=1)
 	
 	
 endfor
-
+killwaves/z sigma2Hat,aHat,muHat
+		killwaves/z tempRow
 
 end
 
@@ -562,7 +561,7 @@ xS = p
 XS/=ns
 xS*=maxDat
 simDat = 0
-string/g xSpace = "xSpace"
+string/g xSpace = "xSpaces"
 duplicate/o xS, $xSpace
 variable i,j
 for (i=0;i<nS;i+=1)

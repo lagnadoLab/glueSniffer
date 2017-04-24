@@ -617,7 +617,7 @@ Function TemporalProfile(WaveName,aName,muName,sigmaName)
 	DeltaF(azName1)
 	newWiener(azName1)
 	concatenate/np=1 {$decon1}, deconMat
-	display $decon1 as "Temporally Deconvolved AZ1"
+	display/k=1 $decon1 as "Temporally Deconvolved AZ1"
 	label left "Deconvolved Amplitude"
 	label bottom "Time (s)"
 	if (nRoi>=2)
@@ -630,7 +630,7 @@ Function TemporalProfile(WaveName,aName,muName,sigmaName)
 		string decon2 = azName2 + "_D"
 		concatenate/np=1 {$decon2}, deconMat
 		print decon2
-			display $decon2 as "Temporally Deconvolved AZ2"
+			display/k=1 $decon2 as "Temporally Deconvolved AZ2"
 		label left "Deconvolved Amplitude"
 		label bottom "Time (s)"
 	endif
@@ -646,7 +646,7 @@ Function TemporalProfile(WaveName,aName,muName,sigmaName)
 	
 	string decon3 = azName3 + "_D"
 		concatenate/np=2 {$decon3}, deconMat
-		display $decon3 as "Temporally Deconvolved AZ3"
+		display/k=1 $decon3 as "Temporally Deconvolved AZ3"
 	label left "Deconvolved Amplitude"
 	label bottom "Time (s)"
 	endif
@@ -660,10 +660,11 @@ Function TemporalProfile(WaveName,aName,muName,sigmaName)
 	newWiener(azName4)
 	string decon4 = azName4 + "_D"
 		concatenate/np=2 {$decon4}, deconMat
-	endif
-	display $decon4 as "Temporally Deconvolved AZ4"
+
+	display/k=1 $decon4 as "Temporally Deconvolved AZ4"
 	label left "Deconvolved Amplitude"
 	label bottom "Time (s)"
+	endif
 	if (nROI >=5)
 		string azName5 = waveName[0, (strlen(waveName)-3)]+"_AZ5"
 	
@@ -674,7 +675,7 @@ Function TemporalProfile(WaveName,aName,muName,sigmaName)
 	newWiener(azName5)
 	string decon5 = azName5 + "_D"
 		concatenate/np=2 {$decon5}, deconMat
-		display $decon5 as "Temporally Deconvolved AZ5"
+		display/k=1 $decon5 as "Temporally Deconvolved AZ5"
 	label left "Deconvolved Amplitude"
 	label bottom "Time (s)"
 	endif
@@ -688,7 +689,7 @@ Function TemporalProfile(WaveName,aName,muName,sigmaName)
 	newWiener(azName6)
 	string decon6 = azName6 + "_D"
 		concatenate/np=2 {$decon6}, deconMat
-		display $decon6 as "Temporally Deconvolved AZ6"
+		display/k=1 $decon6 as "Temporally Deconvolved AZ6"
 	label left "Deconvolved Amplitude"
 	label bottom "Time (s)"
 	endif
