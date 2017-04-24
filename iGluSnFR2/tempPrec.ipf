@@ -251,7 +251,7 @@ for (i=1;i<11;i+=1) //Loop over stim frequencies
 		cycStarts[j] = startTimes[i] + (j)*cycleTime[i]
 		
 		do
-			if (data[k]>cycStarts[j])
+			if (data[k]>cycStarts[j]&& data[k-1] < cycStarts[j])
 				delayMat[onWhichCyc][i] = data[k]-cycStarts[j]
 				if (delayMat[onWhichCyc][i] > cycleTime[i])
 					delayMat[onWhichCyc][i] = NaN
