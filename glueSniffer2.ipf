@@ -1412,6 +1412,7 @@ Struct WMButtonAction &ba
 			
 			
 			contrastTemporal(wavename,5,protocolnum)
+			vectorStrengthContrast(wavename,protocolNum)
 			
 		
 	endswitch
