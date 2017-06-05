@@ -248,6 +248,7 @@ for (i=1;i<11;i+=1) //Loop over stim frequencies
 	make/o/n=(nCyc[i]) cycStarts
 	onWhichCyc = 0
 	for (j=0;j<nCyc[i];j+=1)
+	k=0
 		cycStarts[j] = startTimes[i] + (j)*cycleTime[i]
 		
 		do
@@ -420,3 +421,55 @@ killwaves/z amps, cycStarts, startStop, tempVec, events
 end
 
 
+function vectorStrengthContrast(eventsName,protocolNum)
+string eventsName
+variable protocolNum
+
+
+
+variable stimStart = 10
+variable stimStop = 50
+variable stimPeriod = .2
+string ampName = (eventsName[0,strlen(eventsName)-1])
+
+duplicate/o $eventsName, events, stimEvents
+duplicate/o $ampName, amps, stimAmps
+
+
+
+//Extract events during stim period
+variable nEvents = dimsize(events,0)
+variable i 
+for (i=0;i<nEvents;i+=1)
+	if (events[i] < stimStart | events[i] > stimStop)
+		deletepoints i,1,stimAmps,stimEvents
+	endif
+endfor
+
+
+
+//Compute time since peak by modulo
+variable nStimEvents = dimsize(stimEvents,0)
+make/o/n=(nStimEvents) phaseTimes,cosPart, sinPart
+for (i=0;i<nStimEvents;i+=1)
+	phaseTimes[i] = mod(stimEvents[i]-stimStart,stimPeriod)
+	cosPart[i] = cos(phaseTimes[i]*2*pi/stimPeriod)
+	sinPart[i] = sin(phaseTimes[i]*2*pi/stimPeriod)
+endfor
+variable vectorStrength = 1/nStimEvents * sqrt(sum(sinPart)^2+sum(cosPart)^2)
+variable temporalJitter = sqrt(variance(phaseTimes))
+
+
+string tempString = (eventsName[0,strlen(eventsName)-3]) + "_temp_"+"R" + num2str(protocolNum)
+make/o/n=2 tempValues
+tempValues[0] = {vectorStrength,temporalJitter}
+
+
+variable tempGuess = sqrt(2 * (1-vectorStrength)) / (2 * pi * (1/stimPeriod))
+
+print "Estimated Temporal Jitter from Vector Strength is " + num2str(tempGuess)
+print "Calculated Temporal Jitter is " + num2str(temporalJitter)
+duplicate/o tempValues, $tempString
+//killwaves/z events, amps, phaseTimes,cosPart,sinPart,stimAmps,stimEvents
+
+end
