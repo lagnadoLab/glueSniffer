@@ -128,18 +128,18 @@ Function quantaStuff(ampName,timeName,stimName,protocolNum)
 	
 
 	// Record shit in a logical manner
-	string meanEventName = ampName[0,strlen(ampName)-3] + "Emat_Mean"
-	string varEventName = ampName[0,strlen(ampName)-3] + "EMat_Var"
-	string quantaMatName = ampName[0,strlen(ampName)-3] + "Qmat"
-	string meanMatName = ampName[0,strlen(ampName)-3] + "Qmat_Mean"
-	string varMatName = ampName[0,strlen(ampName)-3] + "Qmat_Var"
-	string sumMatName = ampName[0,strlen(ampName)-3] + "Qsum"
-	string sumMeanName = ampName[0,strlen(ampName)-3] + "Qsum_mean"
-	string sumVarName = ampName[0,strlen(ampName)-3] + "Qsum_var"
-	string sumPerStimName =ampName[0,strlen(ampName)-3] + "stimSum"
-	string quantPerStimName = ampName[0,strlen(ampName)-3] +"stimQsum"
-	string meanMatSumName =ampName[0,strlen(ampName)-3] + "Qmat_MeanSum"
-	string varMatSumName =ampName[0,strlen(ampName)-3] + "Qmat_VarSum"
+	string meanEventName = ampName[0,strlen(ampName)-3] +"R" + num2str(protocolnum) + "_Emat_Mean"
+	string varEventName = ampName[0,strlen(ampName)-3] + "R" + num2str(protocolnum) + "_EMat_Var"
+	string quantaMatName = ampName[0,strlen(ampName)-3] + "R" + num2str(protocolnum) + "_Qmat"
+	string meanMatName = ampName[0,strlen(ampName)-3] + "R" + num2str(protocolnum) + "_Qmat_Mean"
+	string varMatName = ampName[0,strlen(ampName)-3] + "R" + num2str(protocolnum) + "_Qmat_Var"
+	string sumMatName = ampName[0,strlen(ampName)-3] + "R" + num2str(protocolnum) + "_Qsum"
+	string sumMeanName = ampName[0,strlen(ampName)-3] + "R" + num2str(protocolnum) + "_Qsum_mean"
+	string sumVarName = ampName[0,strlen(ampName)-3] + "R" + num2str(protocolnum) + "_Qsum_var"
+	string sumPerStimName =ampName[0,strlen(ampName)-3] + "R" + num2str(protocolnum) + "_stimSum"
+	string quantPerStimName = ampName[0,strlen(ampName)-3] +"R" + num2str(protocolnum) + "_stimQsum"
+	string meanMatSumName =ampName[0,strlen(ampName)-3] + "R" + num2str(protocolnum) + "_Qmat_MeanSum"
+	string varMatSumName =ampName[0,strlen(ampName)-3] + "R" + num2str(protocolnum) + "_Qmat_VarSum"
 	duplicate/o numPerStim, $sumPerStimname
 	duplicate/o quantPerStim, $quantPerStimName
 	duplicate/o quantaMat, $quantaMatName
@@ -206,9 +206,9 @@ end
 
 
 
-Function tempPrec(dataName,stimOrderName,protocolNum)
+Function tempPrec(dataName,stimOrderName,protocolNum,azNum)
 string dataName, stimOrderName
-variable protocolNum
+variable protocolNum,azNum
 duplicate/o $dataName, data
 duplicate/o $stimOrderName, stimOrder
 // tempPrec looks at the delay between the first spike and the cycle start
@@ -222,7 +222,7 @@ duplicate/o $stimOrderName, stimOrder
 	// Protocol number is the run number (integer) of the experiment (for example the second run of the ten stimuli)
 duplicate/o stimOrder, cycleTime
 cycleTime= 1/cycleTime
-
+killwaves/z allDelays
 variable nEvents= dimsize(data,0)
 // Jose Code
 // First 5 seconds are without stimuli, last 5 also
@@ -264,11 +264,15 @@ for (i=1;i<11;i+=1) //Loop over stim frequencies
 		while (k<nEvents)
 		
 endfor
-string delayVecType = delayVec+"_stimRun"+num2str(protocolNum)+"_stim"+ num2str(stimOrder[i])
+string delayVecType = delayVec+"_run"+num2str(protocolNum)+"Az"+num2str(azNUm)+"_stim"+ num2str(stimOrder[i])
 duplicate/o/RMD=[][i] delayMat, tempVec
 
 deletePoints onWhichCyc,(maxDelays-onWhichCyc),tempVec
 duplicate/o tempVec, $delayVecType
+
+concatenate/np {tempVec}, allDelays
+string allDName = "allDelays_az"+num2str(azNum)
+
 
 string delayVecHist = delayVecType + "_H"
 make/o/n=100 $delayVecHist; delayUpdate
@@ -277,8 +281,142 @@ Display/k=1 $delayVecHist
 string res = num2str(dimsize($delayVecType,0)) + " of "+ num2str(nCyc[i]) +" responded"
 textbox res
 endfor
+duplicate/o allDelays, $allDName
 killwaves/z tempVec, delayMat, data, cycStarts,startTimes,cycleTime,nCyc
 
-
+string allDelayHistName = "allDelays"+num2str(azNUm)+"H"
+make/o/n=100 $allDelayHistName; delayupdate
+histogram/b={0,.001,100} $allDName, $allDelayHistName
+display/k=1 $alldelayHistName
 
 end
+
+
+
+
+
+
+
+
+
+
+////////////////// Contrast Temp Proc
+Function contrastTemporal(wavename,frequency,protocolNum)
+string wavename
+variable frequency, protocolNum
+
+duplicate/o $wavename, evts
+
+killwaves/z jitter, startTimes
+
+variable tStart = 10
+variable tStop = 40
+variable stimFreq = 5
+variable cycLen = 1/stimFreq
+variable nCyc = (tStop-tStart)/ cycLen
+variable nEvents = dimsize(evts,0)
+
+make/o/n=(nCyc) startTimes, jitter
+variable i,j
+variable onWhich = 0
+for (i=0;i<nCyc;i+=1)
+	startTimes[i] = tStart + (i*cycLen)
+	for (j=1;j<nEvents;j+=1)
+		if (evts[j] > startTimes[i]  && evts[j-1] <startTimes[i])
+			if (evts[j] -startTimes[i] < cycLen)
+				jitter[onWhich] = evts[j]-startTimes[i]
+				onWhich+=1
+			endif
+		endif
+	endfor
+endfor
+deletepoints onWhich,nCyc-onWhich, jitter
+
+string jitName = (wavename[0,strlen(wavename)-3]) + "_Jitt_R" + num2str(protocolNum)
+duplicate/o jitter, $jitName
+killwaves/z startTimes, jitter
+end
+
+
+
+
+///////////////// Quant Stuff Contrast //////////////
+Function contrastQuantStuff(wavename,ampName,stimFreq,protocolNum)
+string ampName,waveName
+variable stimFreq, protocolNum
+duplicate/o $ampName, amps
+duplicate/o $waveName, events
+
+variable maxQuant = wavemax(amps) // Maximum Quanta in trace
+variable nEvents = dimsize(amps,0)
+
+
+
+// Stimulus cycle stuff
+variable cycleTime = 1/stimFreq
+make/o/n=(2) startStop
+startStop[0] = {10,40} // Start and stop time of stim
+variable nCyc = (startStop[1]-startStop[0])*stimFreq
+
+make/o/n=(nCyc) cycStarts
+make/o/n=(nCyc,maxQuant) quantaMat
+quantaMat = 0
+make/o/n=(nCyc) sumQuanta, eventsMat
+variable i,j,k
+for (i=0;i<nEvents;i+=1)
+	for (j=0;j<nCyc;j+=1)
+		cycStarts[j] = startStop[0] + (j*cycleTime)
+		if (events[i] >cycStarts[j] && events[i] < cycStarts[j]+cycleTime)
+			eventsMat[j] +=1
+			sumQuanta[j]+=amps[i]
+			for (k=1;k<maxQuant+1;k+=1)
+				if (amps[i]==k)
+					quantaMat[j][k-1] +=1
+				endif
+			endfor
+		endif
+	endfor
+endfor
+
+///Mean an var stuff for cycle stuff
+make/o/n=(maxQuant) meanQ,varQ
+for (i=1;i<maxQuant+1;i+=1)
+	duplicate/o/rmd=[][i] quantaMat, tempVec
+	meanQ[i-1] = mean(tempVec)
+	varQ[i-1] = variance(tempVec)
+endfor
+
+make/o/n=1 qSumMean, qSumVar,eSumMean,eSumVar
+qSumMean[0] = mean(sumQuanta)
+qSumVar[0] = variance(sumQuanta)
+eSumMean[0] = mean(eventsMat)
+eSumVar[0] = variance(eventsMat)
+
+string quantaMatN = ampName[0,strlen(ampName)-3] + "R" +num2str(protocolNum) + "_Qmat"
+string quantaMean = ampName[0,strlen(ampName)-3] + "R" +num2str(protocolNum) + "_QMean"
+string quantaVar = ampName[0,strlen(ampName)-3] + "R" +num2str(protocolNum) + "_Qvar"
+string sumQuantaN = ampName[0,strlen(ampName)-3] + "R" +num2str(protocolNum) + "_Qsum"
+string sumEvents = ampName[0,strlen(ampName)-3] + "R" +num2str(protocolNum) + "_Esum"
+string quantaSumVar = ampName[0,strlen(ampName)-3] + "R" +num2str(protocolNum) + "_Qsum_var"
+string quantaSumMean = ampName[0,strlen(ampName)-3] + "R" +num2str(protocolNum) + "_Qsum_Mean"
+string sumEventsMean = ampName[0,strlen(ampName)-3] + "R" +num2str(protocolNum) + "_Esum_mean"
+string sumEventsVar = ampName[0,strlen(ampName)-3] + "R" +num2str(protocolNum) + "_Emat_Var"
+
+
+duplicate/o qSumMean, $quantaSumMean
+duplicate/o qSumVar, $quantaSumVar
+duplicate/o eSumMean, $sumEventsMean
+duplicate/o eSumVar, $sumEventsVar
+duplicate/o meanQ, $quantaMean
+duplicate/o varQ, $quantaVar
+duplicate/o quantaMat, $quantaMatN
+duplicate/o sumQuanta, $sumQuantaN
+duplicate/o eventsMat, $sumEvents
+
+
+
+killwaves/z meanQ, varQ, quantaMat, sumQuanta, eventsMat, qSumMean, qSumVar, eSumMean, eSumVar
+killwaves/z amps, cycStarts, startStop, tempVec, events
+end
+
+

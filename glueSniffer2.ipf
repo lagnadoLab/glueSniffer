@@ -79,16 +79,27 @@ Window glueSniffer() : Panel
 	Button button13,fColor=(65015,39905,23740)
 	Button button9,pos={17.00,180.00},size={120.00,20.00},proc=clusterButt,title="Cluster"
 	Button button9,fColor=(65015,39905,23740)
-	Button button10,pos={159.00,180.00},size={120.00,20.00},proc=sepQuantProc,title="Quanta Stuff"
+	Button button10,pos={159.00,210.00},size={120.00,20.00},proc=sepQuantProc,title="Quanta Stuff"
 	Button button10,fColor=(65015,39905,23740)
 	Button button11, pos={17,210},size={120,20}, proc=tempPresProc, title = "Precision"
 	Button button11, fColor = (65015,39905,23740)
 
-
+	Button button14, pos = {17,240}, size = {120,20}, proc = contrastTempProc, title= "Cont Prec"
+	Button button14, fColor = (65015,39905,23740)
+	
+	Button button15,pos = {159,240}, size = {120,20}, proc = contrastQuantProc, title="Cont Quant"
+	Button button15, fColor = (65015,39905,23740)
 
 
 EndMacro
 	
+	
+	
+	
+	
+	
+	
+
 	
 	
 
@@ -903,8 +914,13 @@ Struct WMButtonAction &ba
 			string eventName = waveName[0,strlen(waveName)-3] + "E"
 			duplicate/o $eventName, times
 			
-			make/o/n=12 stimOrder1, stimOrder2,stimOrder3,stimOrder4
+			make/o/n=12 stimOrder1, stimOrder2,stimOrder3,stimOrder4, stimOrder5
 			stimOrder1 = {0,.5,1,2,5,8,10,15,20,25,30,0}
+			stimOrder2 = {0,8,15,10,.5,1,20,2,30,5,25,0}
+			stimOrder3 = {0,15,.5,8,2,10,1,20,30,5,25,0}
+			stimOrder4 = {0,5,2,1,.5,30,25,20,15,10,8,0}
+			stimOrder5 = {0,30,25,20,15,10,8,5,2,1,.5,0}
+			
 			string stimList = wavelist("*order*",";","Dims:1")
 			string stimName
 			prompt stimname, "Select Stim Order Wave",popup, stimList
@@ -914,7 +930,7 @@ Struct WMButtonAction &ba
 			endif
 			
 			
-			variable protocolNum = 0
+			variable protocolNum = 1
 			prompt protocolNum, "Enter protocol Number"
 			doprompt "Enter protocol Number", protocolnum
 			if(V_flag==1)
@@ -1006,8 +1022,12 @@ Struct WMButtonAction &ba
 				Abort
 			endif
 			
-			make/o/n=12 stimOrder1, stimOrder2,stimOrder3,stimOrder4
+			make/o/n=12 stimOrder1, stimOrder2,stimOrder3,stimOrder4,stimOrder5
 			stimOrder1 = {0,.5,1,2,5,8,10,15,20,25,30,0}
+			stimOrder2 = {0,8,15,10,.5,1,20,2,30,5,25,0}
+			stimOrder3 = {0,15,.5,8,2,10,1,20,30,5,25,0}
+			stimOrder4 = {0,5,2,1,.5,30,25,20,15,10,8,0}
+			stimOrder5 = {0,30,25,20,15,10,8,5,2,1,.5,0}
 			
 			string stimList = wavelist("*rder*",";","Dims:1")
 			string stimName
@@ -1025,10 +1045,18 @@ Struct WMButtonAction &ba
 					Abort
 			endif
 			
+			variable azNum = 1
+			prompt azNum, "Enter az Number"
+			doprompt "Enter az Number", aznum
+			if(V_flag==1)
+					Abort
+			endif
 			
 			
 			
-			tempPrec(wavename,stimName,protocolnum)
+			
+			
+			tempPrec(wavename,stimName,protocolnum,azNum)
 			
 		
 	endswitch
@@ -1355,3 +1383,82 @@ Function TemporalProfileOld(waveName)
 	return 0
 
 End
+
+
+
+
+/// Contrast Functions ////////////////////////////////////////////////////////////////////
+Function contrastTempProc(ba): ButtonControl
+Struct WMButtonAction &ba
+	switch(ba.eventCode)
+		case 2: 
+			string list=wavelist("*_E",";","DIMS:2")
+			string waveName
+			prompt waveName, "Select TimeSeries", popup,list
+			doprompt "Pick your wave", waveName
+     		if(V_flag==1)
+				Abort
+			endif
+			
+			
+				
+			variable protocolNum = 1
+			prompt protocolNum, "Enter protocol Number"
+			doprompt "Enter protocol Number", protocolnum
+			if(V_flag==1)
+					Abort
+			endif
+			
+			
+			
+			contrastTemporal(wavename,5,protocolnum)
+			
+		
+	endswitch
+end
+
+
+
+/// Contrast Quanta Stuff///////////////////////
+
+Function contrastQuantProc(ba): ButtonControl
+Struct WMButtonAction &ba
+	switch(ba.eventCode)
+		case 2: 
+		
+			string list=wavelist("*_E",";","DIMS:2")
+			string waveName
+			prompt waveName, "Select TimeSeries", popup,list
+			doprompt "Pick your wave", waveName
+     		if(V_flag==1)
+				Abort
+			endif
+			
+			
+				
+			string lista=wavelist("*_AQ",";","DIMS:1")
+			string ampName
+			prompt ampName, "Select Amp Wave", popup,lista
+			doprompt "Pick your wave", ampName
+     		if(V_flag==1)
+				Abort
+			endif
+			
+			variable protocolNum = 1
+			prompt protocolNum, "Enter protocol Number"
+			doprompt "Enter protocol Number", protocolnum
+			if(V_flag==1)
+					Abort
+			endif
+			
+			variable stimFreq = 5
+			
+			
+			
+			
+			contrastQuantStuff(wavename,ampName,stimFreq,protocolNum)
+			
+			
+		
+	endswitch
+end
