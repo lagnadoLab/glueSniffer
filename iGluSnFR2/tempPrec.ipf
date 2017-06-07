@@ -430,7 +430,7 @@ variable protocolNum
 variable stimStart = 10
 variable stimStop = 50
 variable stimPeriod = .2
-string ampName = (eventsName[0,strlen(eventsName)-1])
+string ampName = (eventsName[0,strlen(eventsName)-2])+"AQ"
 
 duplicate/o $eventsName, events, stimEvents
 duplicate/o $ampName, amps, stimAmps
@@ -440,16 +440,36 @@ duplicate/o $ampName, amps, stimAmps
 //Extract events during stim period
 variable nEvents = dimsize(events,0)
 variable i 
-for (i=0;i<nEvents;i+=1)
-	if (events[i] < stimStart | events[i] > stimStop)
-		deletepoints i,1,stimAmps,stimEvents
+
+
+for (i=1;i<nEvents;i+=1)
+	if (events[i] > stimStart && events[i-1]<stimStart)
+		variable startInd = i
+		break
 	endif
 endfor
 
 
+if (events[nEvents-1]<stimStop)
+	variable stopInd = nEvents
+else
+	findlevel/p/edge=1 events, stimStop
+	
+	 stopInd = V_levelx
+endif
 
-//Compute time since peak by modulo
-variable nStimEvents = dimsize(stimEvents,0)
+print stopInd, startInd
+duplicate/o/r=[startInd,stopInd] events, stimEvents
+
+duplicate/o/r=[startInd,stopInd] amps, stimAmps
+
+		
+
+
+
+
+//Compute time since peak by modulo and jitter stuff
+ variable nStimEvents = dimsize(stimEvents,0)
 make/o/n=(nStimEvents) phaseTimes,cosPart, sinPart
 for (i=0;i<nStimEvents;i+=1)
 	phaseTimes[i] = mod(stimEvents[i]-stimStart,stimPeriod)
@@ -470,6 +490,52 @@ variable tempGuess = sqrt(2 * (1-vectorStrength)) / (2 * pi * (1/stimPeriod))
 print "Estimated Temporal Jitter from Vector Strength is " + num2str(tempGuess)
 print "Calculated Temporal Jitter is " + num2str(temporalJitter)
 duplicate/o tempValues, $tempString
-//killwaves/z events, amps, phaseTimes,cosPart,sinPart,stimAmps,stimEvents
+killwaves/z phaseTimes,cosPart,sinPart
 
+
+
+// Compute same metrics as above, but divide into quanta
+
+variable maxQ = wavemax(stimAmps)
+make/o/n=(maxQ) nQevents, tempJitter,vecStren
+nQevents = 0
+
+variable j
+for (i=0;i<nStimEvents;i+=1)
+	for (j=0;j<maxQ;j+=1)
+		if (stimAmps[i]==j)
+			nQevents[j] +=1
+		endif
+	endfor
+endfor
+
+variable onWhichEvent
+for (i=1;i<maxQ;i+=1)	
+	make/o/n=(nQevents[i]) tempPhaseEvents, tempSinPart,tempCosPart
+	onWhichEvent = 0
+	for (j=0;j<nStimEvents;j+=1)
+		if (stimamps[j]==i)
+			tempPhaseEvents[onwhichEvent] = mod(stimevents[j]-10,stimPeriod)
+			tempSinPart[onwhichEvent] = cos(tempPhaseEvents[onwhichEvent] * 2 * pi/ stimPeriod)
+			tempCosPart[onwhichEvent] = sin(tempPhaseEvents[onwhichEvent] * 2 *pi /stimPeriod)
+			onWhichEvent+=1
+		endif
+	endfor
+	tempJitter[i] = sqrt(variance(tempPhaseEvents))
+	vecStren[i] = 1/nQEvents[i] * sqrt(sum(tempSinPart)^2 + sum(tempCosPart)^2)
+endfor
+
+
+	
+//killwaves/z amps,events,tempSinPart, tempCosPart, tempPhaseEvents, stimAmps,stimEvents
+
+string vecString = (eventsName[0,strlen(eventsName)-3]) + "_VS_"+"R" + num2str(protocolNum)
+string jitterString = (eventsName[0,strlen(eventsName)-3]) + "_TJ_"+"R" + num2str(protocolNum)
+duplicate/o tempJitter, $jitterString
+duplicate/o vecStren, $vecString
+
+killwaves/z vecStren, tempJitter
 end
+
+
+
