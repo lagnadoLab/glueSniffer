@@ -16,6 +16,7 @@
 #include "testGMM"
 #include "tempPrec"
 #include "threshGUI"
+#include "timingStuff"
 
 //////////////////////////////////// GLUE SNIFFER OVERVIEW /////////////////////////
 // This is the base of the iGluSnFR events analysis code. 
@@ -55,7 +56,7 @@ Window glueSniffer() : Panel
 	ShowTools/A
 	SetDrawLayer UserBack
 	SetDrawEnv linethick= 0,fillfgc= (64824,27308,21496)
-	DrawRRect 5,50,290,246
+	DrawRRect 5,50,290,205
 	Button button1,pos={17.00,14.00},size={120.00,20.00},proc=loadMoviesButt,title="Load Movies"
 	Button button1,fSize=14,fStyle=1,fColor=(65015,39905,23740)
 	Button button1a,pos={159.00,14.00},size={120.00,20.00},proc=enterParamsButt,title="Enter Params"
@@ -1045,18 +1046,13 @@ Struct WMButtonAction &ba
 					Abort
 			endif
 			
-			variable azNum = 1
-			prompt azNum, "Enter az Number"
-			doprompt "Enter az Number", aznum
-			if(V_flag==1)
-					Abort
-			endif
+			
+			string ampName = (wavename[0,strlen(wavename)-2]) + "AQ"
 			
 			
+			timingFrequency(wavename,ampName,stimName,protocolNum)
 			
-			
-			
-			tempPrec(wavename,stimName,protocolnum,azNum)
+			//tempPrec(wavename,stimName,protocolnum,azNum)
 			
 		
 	endswitch
@@ -1408,11 +1404,11 @@ Struct WMButtonAction &ba
 			if(V_flag==1)
 					Abort
 			endif
-			
-			
-			
-			contrastTemporal(wavename,5,protocolnum)
-			vectorStrengthContrast(wavename,protocolNum)
+			variable freq = 5
+			string ampName = wavename[0,strlen(wavename)-2] + "AQ"
+			timingContrast(wavename,ampName,freq,protocolNum)
+			//contrastTemporal(wavename,5,protocolnum)
+			//vectorStrengthContrast(wavename,protocolNum)
 			
 		
 	endswitch
