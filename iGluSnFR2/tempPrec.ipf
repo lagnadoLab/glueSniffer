@@ -539,3 +539,24 @@ end
 
 
 
+///////////////////////////////////////////////////////////////////
+Function vectorStrengthFreq(eventName,stimName,protocolNum)
+string eventName, stimName
+variable protocolNum
+
+
+string ampName = (eventName[0,strlen(eventname)-2]) + "AQ"
+
+duplicate/o $eventName, events
+duplicate/o $ampName, amps
+duplicate/o $stimName, stims
+make/o/n=12 startTimes
+startTimes[0] = {0,5,11,17,23,29,35,41,47,53,59,65}
+
+variable nStims = 10
+variable i
+for (i=1;i<nStims-1;i+=1)
+endfor
+end
+
+
