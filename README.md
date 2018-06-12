@@ -1,5 +1,5 @@
 # glueSniffer
-Glue Sniffer Analysis
+Glue Sniffer Analysis Package. A description can be found in the Supplemental Information located: https://www.biorxiv.org/content/early/2018/05/30/328682
 
 # Load Movies
 The load movies button creates a popup listbox allowing the user to select a linescan movie to analyze. The current version of the code only allows for linear linescans (ie. no curves in the linescan). 
@@ -27,3 +27,6 @@ Creates a temporal profile by uniformly averaging all points within the ROI defi
 
 # Threshold
 Initializes an event detection GUI. Events are defined as local maxima of the deconvolved wave above a certain user-set threshold. The GUI graphically displays detected events based on a threshold set with a slider bar.
+
+# Cluster
+Runs an EM GMM algorithm to cluster detected events. Outputs the MAP estimates.
